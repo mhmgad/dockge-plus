@@ -47,15 +47,22 @@
                 <router-link to="/compose">{{ $t("addFirstStackMsg") }}</router-link>
             </div>
 
-            <StackListItem
-                v-for="(item, index) in sortedStackList"
-                :key="index"
-                :stack="item"
-                :isSelectMode="selectMode"
-                :isSelected="isSelected"
-                :select="select"
-                :deselect="deselect"
-            />
+            <div v-for="(repoStacks, repoName) in groupedStackList" :key="repoName" class="repo-group">
+                <div class="repo-header">
+                    <font-awesome-icon icon="folder" class="me-2" />
+                    <span class="repo-name">{{ repoName }}</span>
+                    <span class="stack-count">({{ repoStacks.length }})</span>
+                </div>
+                <StackListItem
+                    v-for="(item, index) in repoStacks"
+                    :key="index"
+                    :stack="item"
+                    :isSelectMode="selectMode"
+                    :isSelected="isSelected"
+                    :select="select"
+                    :deselect="deselect"
+                />
+            </div>
         </div>
     </div>
 
@@ -124,12 +131,14 @@ export default {
 
             result = result.filter(stack => {
                 // filter by search text
-                // finds stack name, tag name or tag value
+                // finds stack name, tag name, tag value, or repo name
                 let searchTextMatch = true;
                 if (this.searchText !== "") {
                     const loweredSearchText = this.searchText.toLowerCase();
+                    const repoName = stack.repo || "local";
                     searchTextMatch =
                         stack.name.toLowerCase().includes(loweredSearchText)
+                        || repoName.toLowerCase().includes(loweredSearchText)
                         || stack.tags.find(tag => tag.name.toLowerCase().includes(loweredSearchText)
                             || tag.value?.toLowerCase().includes(loweredSearchText));
                 }
@@ -188,6 +197,43 @@ export default {
             });
 
             return result;
+        },
+
+        /**
+         * Groups the sorted stack list by repo (parent folder).
+         * @returns {Object} Object with repo names as keys and arrays of stacks as values.
+         */
+        groupedStackList() {
+            const groups = {};
+
+            for (const stack of this.sortedStackList) {
+                const repoName = stack.repo || "local";
+
+                if (!groups[repoName]) {
+                    groups[repoName] = [];
+                }
+
+                groups[repoName].push(stack);
+            }
+
+            // Sort repo names, with "local" always first
+            const sortedRepos = Object.keys(groups).sort((a, b) => {
+                if (a === "local") {
+                    return -1;
+                }
+                if (b === "local") {
+                    return 1;
+                }
+                return a.localeCompare(b);
+            });
+
+            // Create sorted object
+            const sortedGroups = {};
+            for (const repoName of sortedRepos) {
+                sortedGroups[repoName] = groups[repoName];
+            }
+
+            return sortedGroups;
         },
 
         isDarkTheme() {
@@ -442,6 +488,37 @@ export default {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.repo-group {
+    margin-bottom: 1rem;
+}
+
+.repo-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #666;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 6px;
+    margin-bottom: 4px;
+
+    .dark & {
+        color: #aaa;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .repo-name {
+        flex-grow: 1;
+    }
+
+    .stack-count {
+        font-size: 12px;
+        opacity: 0.7;
+        margin-left: 8px;
+    }
 }
 
 </style>
