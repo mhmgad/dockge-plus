@@ -499,6 +499,8 @@ export class Stack {
         // Add project name to ensure unique identification of stacks
         // This helps disambiguate stacks with the same name in different repos
         // Convert forward slashes to hyphens for project name (e.g., "repo1/myapp" -> "repo1-myapp")
+        // This is safe because stack names are validated to match [a-z0-9_-]+(?:\/[a-z0-9_-]+)*$
+        // which ensures they start with a letter/number and only contain valid Docker Compose project name characters
         const projectName = this.name.replace(/\//g, "-");
         options.splice(1, 0, "-p", projectName);
 
