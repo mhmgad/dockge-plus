@@ -473,12 +473,17 @@ export default {
             if (!timestamp) {
                 return "";
             }
+
+            const MINUTE_MS = 60000;
+            const HOUR_MS = 3600000;
+            const DAY_MS = 86400000;
+
             const date = new Date(timestamp);
             const now = new Date();
             const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMs / 3600000);
-            const diffDays = Math.floor(diffMs / 86400000);
+            const diffMins = Math.floor(diffMs / MINUTE_MS);
+            const diffHours = Math.floor(diffMs / HOUR_MS);
+            const diffDays = Math.floor(diffMs / DAY_MS);
 
             if (diffMins < 1) {
                 return this.$t("justNow") || "Just now";
