@@ -30,7 +30,7 @@
                     />
                 </div>
                 <div class="mb-2">
-                    <label for="gitPassword" class="form-label">{{ $t('Password') }} / {{ $t('token') }}</label>
+                    <label for="gitPassword" class="form-label">{{ $t('passwordOrToken') || 'Password / Token' }}</label>
                     <input
                         id="gitPassword"
                         v-model="credentials.password"
@@ -174,7 +174,7 @@
                     />
                 </div>
                 <div class="mb-2">
-                    <label for="gitPassword" class="form-label">{{ $t('Password') }} / {{ $t('token') }}</label>
+                    <label for="gitPassword" class="form-label">{{ $t('passwordOrToken') || 'Password / Token' }}</label>
                     <input
                         id="gitPassword"
                         v-model="credentials.password"

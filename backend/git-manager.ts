@@ -279,10 +279,10 @@ export class GitManager {
             const remoteCommits: { hash: string; message: string; author: string; date: string }[] = [];
             if (status.behind > 0 && !needsCredentials) {
                 try {
-                    const log = await git.log({
-                        from: status.current || "HEAD",
-                        to: `origin/${status.tracking || status.current}`,
-                    });
+                    // Get commits on remote that we don't have locally
+                    const currentBranch = status.current || "HEAD";
+                    const trackingBranch = status.tracking || status.current;
+                    const log = await git.log([ `${currentBranch}..origin/${trackingBranch}` ]);
 
                     for (const commit of log.all) {
                         remoteCommits.push({
@@ -338,9 +338,11 @@ export class GitManager {
             }
 
             // First pull remote changes
-            const status = await git.status();
+            let status = await git.status();
             if (status.behind > 0) {
                 await git.pull();
+                // Refresh status after pull to get updated ahead count
+                status = await git.status();
             }
 
             // Then push local changes

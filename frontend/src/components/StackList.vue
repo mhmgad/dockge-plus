@@ -523,7 +523,7 @@ export default {
                     if (this.repoGitInfo[repoName]) {
                         this.repoGitInfo[repoName].processing = false;
                     }
-                    this.$root.toastError("Git credentials are required. Please open the stack's git status to configure credentials.");
+                    this.$root.toastError(this.$t("gitCredentialsRequiredForSync") || "Git credentials are required. Please open the stack's git status to configure credentials.");
                     return;
                 }
 
@@ -532,19 +532,20 @@ export default {
                     if (this.repoGitInfo[repoName]) {
                         this.repoGitInfo[repoName].processing = false;
                     }
-                    this.$root.toastSuccess("Already in sync!");
+                    this.$root.toastSuccess(this.$t("alreadyInSync") || "Already in sync!");
                     return;
                 }
 
                 // Build confirmation message
-                let message = "Sync will:\n";
+                let message = this.$t("syncWill") || "Sync will:\n";
+                message += "\n";
                 if (preview.hasRemoteChanges) {
-                    message += `- Pull ${preview.behind} commit(s) from remote\n`;
+                    message += (this.$t("pullCommitsFromRemote", [ preview.behind ]) || `- Pull ${preview.behind} commit(s) from remote`) + "\n";
                 }
                 if (preview.hasLocalChanges) {
-                    message += `- Push ${preview.ahead} commit(s) to remote\n`;
+                    message += (this.$t("pushCommitsToRemote", [ preview.ahead ]) || `- Push ${preview.ahead} commit(s) to remote`) + "\n";
                 }
-                message += "\nContinue?";
+                message += "\n" + (this.$t("continue") || "Continue?");
 
                 if (confirm(message)) {
                     // Perform sync
