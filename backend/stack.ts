@@ -175,7 +175,7 @@ export class Stack {
 
     /**
      * Get the repo name (parent folder) for this stack
-     * If the stack is in the root directory, return "local"
+     * If the stack is in the root directory, return "Default"
      */
     get repo() : string {
         // Stack names always use forward slashes regardless of OS
@@ -185,7 +185,7 @@ export class Stack {
             return parts[0];
         }
         // Stack is in the root directory
-        return "local";
+        return "Default";
     }
 
     /**
