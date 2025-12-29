@@ -207,15 +207,34 @@
                 >
                     {{ $t('retryWithCredentials') || 'Retry with Credentials' }}
                 </button>
-                <button
-                    v-if="!syncPreview.needsCredentials || (credentials.username && credentials.password)"
-                    class="btn btn-success"
-                    :disabled="processing || (!syncPreview.hasLocalChanges && !syncPreview.hasRemoteChanges)"
-                    @click="confirmSync"
-                >
-                    <font-awesome-icon icon="sync" class="me-1" />
-                    {{ $t('confirmSync') || 'Confirm Sync' }}
-                </button>
+                <template v-if="!syncPreview.needsCredentials || (credentials.username && credentials.password)">
+                    <button
+                        v-if="syncPreview.hasRemoteChanges"
+                        class="btn btn-info"
+                        :disabled="processing"
+                        @click="pullOnly"
+                    >
+                        <font-awesome-icon icon="download" class="me-1" />
+                        {{ $t('pullOnly') || 'Pull Only' }}
+                    </button>
+                    <button
+                        v-if="syncPreview.hasLocalChanges"
+                        class="btn btn-warning"
+                        :disabled="processing"
+                        @click="pushOnly"
+                    >
+                        <font-awesome-icon icon="upload" class="me-1" />
+                        {{ $t('pushOnly') || 'Push Only' }}
+                    </button>
+                    <button
+                        class="btn btn-success"
+                        :disabled="processing || (!syncPreview.hasLocalChanges && !syncPreview.hasRemoteChanges)"
+                        @click="confirmSync"
+                    >
+                        <font-awesome-icon icon="sync" class="me-1" />
+                        {{ $t('confirmSync') || 'Confirm Sync' }}
+                    </button>
+                </template>
             </template>
 
             <!-- Normal Mode Buttons -->
@@ -454,6 +473,42 @@ export default {
                 : null;
 
             this.$root.emitAgent(this.endpoint, "gitSync", this.stackName, creds, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+                if (res.ok) {
+                    this.showSyncPreview = false;
+                    this.showCredentialsDialog = false;
+                    this.loadGitStatus();
+                }
+            });
+        },
+
+        async pullOnly() {
+            this.processing = true;
+
+            const creds = this.credentials.username && this.credentials.password
+                ? this.credentials
+                : null;
+
+            this.$root.emitAgent(this.endpoint, "gitPull", this.stackName, creds, (res) => {
+                this.processing = false;
+                this.$root.toastRes(res);
+                if (res.ok) {
+                    this.showSyncPreview = false;
+                    this.showCredentialsDialog = false;
+                    this.loadGitStatus();
+                }
+            });
+        },
+
+        async pushOnly() {
+            this.processing = true;
+
+            const creds = this.credentials.username && this.credentials.password
+                ? this.credentials
+                : null;
+
+            this.$root.emitAgent(this.endpoint, "gitPush", this.stackName, creds, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
                 if (res.ok) {
