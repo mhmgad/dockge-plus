@@ -339,13 +339,10 @@ export default {
         gitIdentifier() {
             return this.isDefaultStack ? this.stackName : this.repoName;
         },
-<<<<<<< HEAD
         // Check if there are outgoing commits to push
         hasOutgoingCommits() {
             return (this.gitStatus.outgoingCommits && this.gitStatus.outgoingCommits.length > 0) || this.gitStatus.ahead > 0;
         },
-=======
->>>>>>> ff3212b (Feature/git sync on repo (#11))
     },
     methods: {
         async open() {
@@ -493,7 +490,6 @@ export default {
                 if (res.ok) {
                     this.needsCredentials = false;
                     this.showCredentialsForm = false;
-<<<<<<< HEAD
                     this.loadGitStatus();
                 }
             });
@@ -513,8 +509,6 @@ export default {
                 if (res.ok) {
                     this.needsCredentials = false;
                     this.showCredentialsForm = false;
-=======
->>>>>>> ff3212b (Feature/git sync on repo (#11))
                     this.loadGitStatus();
                 }
             });
@@ -704,7 +698,6 @@ export default {
 
 .dark .credentials-form .card-header {
     background-color: rgba($primary, 0.15);
-<<<<<<< HEAD
 }
 
 /* Pull button styling */
@@ -775,7 +768,5 @@ export default {
             color: $dark-font-color2;
         }
     }
-=======
->>>>>>> ff3212b (Feature/git sync on repo (#11))
 }
 </style>
