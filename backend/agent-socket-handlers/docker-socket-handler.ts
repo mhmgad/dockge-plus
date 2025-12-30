@@ -525,6 +525,85 @@ export class DockerSocketHandler extends AgentSocketHandler {
             }
         });
 
+        // Get git info for a specific stack (used for Default stacks)
+        agentSocket.on("getStackGitInfo", async (stackName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = await Stack.getStack(server, stackName);
+                const gitInfo = await GitManager.getBasicInfo(stack.path);
+                callbackResult({
+                    ok: true,
+                    gitInfo,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // Get full git status for a specific stack (used for Default stacks)
+        agentSocket.on("getStackGitStatus", async (stackName : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = await Stack.getStack(server, stackName);
+                const isGitRepo = await GitManager.isGitRepository(stack.path);
+
+                if (!isGitRepo) {
+                    callbackResult({
+                        ok: false,
+                        msg: "Not a git repository",
+                    }, callback);
+                    return;
+                }
+
+                const gitStatus = await GitManager.getRepoStatus(stack.path);
+                callbackResult({
+                    ok: true,
+                    gitStatus,
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
+        // Fetch remote for a specific stack (used for Default stacks)
+        agentSocket.on("gitFetchStack", async (stackName : unknown, credentials : unknown, callback) => {
+            try {
+                checkLogin(socket);
+
+                if (typeof(stackName) !== "string") {
+                    throw new ValidationError("Stack name must be a string");
+                }
+
+                const stack = await Stack.getStack(server, stackName);
+
+                let creds: GitCredentials | null = null;
+                if (credentials && typeof credentials === "object" && "username" in credentials && "password" in credentials) {
+                    creds = credentials as GitCredentials;
+                    await GitManager.saveCredentials(creds);
+                } else {
+                    creds = await GitManager.getCredentials();
+                }
+
+                await GitManager.fetch(stack.path, creds || undefined);
+                callbackResult({
+                    ok: true,
+                    msg: "Fetched from remote",
+                }, callback);
+            } catch (e) {
+                callbackError(e, callback);
+            }
+        });
+
         // Get full git status for a repo (including remote diff)
         agentSocket.on("getRepoGitStatus", async (repoName : unknown, callback) => {
             try {

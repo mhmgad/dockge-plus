@@ -79,6 +79,9 @@
                     :isSelected="isSelected"
                     :select="select"
                     :deselect="deselect"
+                    :isGitRepo="stackGitInfo[item.name]?.isGitRepo || false"
+                    :lastSyncTime="stackGitInfo[item.name]?.lastSyncTime || ''"
+                    @open-git-sync="openStackGitSync"
                 />
             </div>
         </div>
@@ -92,6 +95,7 @@
         ref="gitStatusModal"
         :repo-name="selectedRepoName"
         :endpoint="selectedRepoEndpoint"
+        :stack-name="selectedStackName"
     />
 </template>
 
@@ -127,8 +131,10 @@ export default {
                 tags: null,
             },
             repoGitInfo: {},
+            stackGitInfo: {},
             selectedRepoName: "",
             selectedRepoEndpoint: "",
+            selectedStackName: "",
         };
     },
     computed: {
@@ -434,9 +440,7 @@ export default {
          */
         fetchAllRepoGitInfo() {
             for (const repoName of Object.keys(this.groupedStackList)) {
-                if (repoName !== "Default") {
-                    this.fetchRepoGitInfo(repoName);
-                }
+                this.fetchRepoGitInfo(repoName);
             }
         },
         /**
@@ -445,12 +449,18 @@ export default {
          * @returns {void}
          */
         fetchRepoGitInfo(repoName) {
-            if (!repoName || repoName === "Default") {
+            if (!repoName) {
                 return;
             }
 
             const stacks = this.groupedStackList[repoName];
             if (!stacks || stacks.length === 0) {
+                return;
+            }
+
+            // For Default stacks, check each stack individually
+            if (repoName === "Default") {
+                this.fetchDefaultStacksGitInfo(stacks);
                 return;
             }
 
@@ -464,9 +474,32 @@ export default {
                         ahead: res.gitInfo.ahead || 0,
                         behind: res.gitInfo.behind || 0,
                         processing: false,
+                        gitRepoStackName: stacks[0].name,
                     };
                 }
             });
+        },
+        /**
+         * Fetch git info for Default stacks (each could be its own git repo)
+         * @param {Array} stacks - Array of stacks in the Default group
+         * @returns {void}
+         */
+        fetchDefaultStacksGitInfo(stacks) {
+            for (const stack of stacks) {
+                const endpoint = stack.endpoint || "";
+
+                this.$root.emitAgent(endpoint, "getStackGitInfo", stack.name, (res) => {
+                    if (res.ok && res.gitInfo) {
+                        this.stackGitInfo[stack.name] = {
+                            isGitRepo: res.gitInfo.isGitRepo,
+                            lastSyncTime: res.gitInfo.lastCommitDate,
+                            ahead: res.gitInfo.ahead || 0,
+                            behind: res.gitInfo.behind || 0,
+                            processing: false,
+                        };
+                    }
+                });
+            }
         },
         /**
          * Format the sync time for display
@@ -514,6 +547,27 @@ export default {
 
             this.selectedRepoName = repoName;
             this.selectedRepoEndpoint = sampleStack.endpoint || "";
+            this.selectedStackName = "";
+
+            // Use nextTick to ensure props are updated before opening
+            this.$nextTick(() => {
+                this.$refs.gitStatusModal.open();
+            });
+        },
+
+        /**
+         * Open Git Sync modal for a specific stack (used for Default stacks)
+         * @param {object} stack - The stack to open git sync for
+         * @returns {void}
+         */
+        openStackGitSync(stack) {
+            if (!stack) {
+                return;
+            }
+
+            this.selectedRepoName = "Default";
+            this.selectedRepoEndpoint = stack.endpoint || "";
+            this.selectedStackName = stack.name;
 
             // Use nextTick to ensure props are updated before opening
             this.$nextTick(() => {
@@ -642,23 +696,19 @@ export default {
     .repo-header-left {
         display: flex;
         align-items: center;
-        flex-grow: 1;
     }
 
     .repo-header-right {
         display: flex;
         align-items: center;
         gap: 8px;
-    }
-
-    .repo-name {
-        flex-grow: 1;
+        margin-left: auto;
     }
 
     .stack-count {
         font-size: 12px;
         opacity: 0.7;
-        margin-left: 8px;
+        margin-left: 4px;
     }
 
     .last-sync-time {

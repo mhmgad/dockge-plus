@@ -277,6 +277,10 @@ export default {
             type: String,
             default: "",
         },
+        stackName: {
+            type: String,
+            default: "",
+        },
     },
     data() {
         return {
@@ -318,6 +322,14 @@ export default {
             const outgoing = this.gitStatus.outgoingCommits?.length || 0;
             return incoming + outgoing;
         },
+        // For Default stacks, use stack-based API; otherwise use repo-based API
+        isDefaultStack() {
+            return this.repoName === "Default" && this.stackName;
+        },
+        // The identifier to use for git operations
+        gitIdentifier() {
+            return this.isDefaultStack ? this.stackName : this.repoName;
+        },
     },
     methods: {
         async open() {
@@ -340,7 +352,8 @@ export default {
 
         async loadGitStatus() {
             this.loading = true;
-            this.$root.emitAgent(this.endpoint, "getRepoGitStatus", this.repoName, (res) => {
+            const event = this.isDefaultStack ? "getStackGitStatus" : "getRepoGitStatus";
+            this.$root.emitAgent(this.endpoint, event, this.gitIdentifier, (res) => {
                 this.loading = false;
                 if (res.ok) {
                     if (res.gitStatus) {
@@ -362,7 +375,8 @@ export default {
                 ? this.credentials
                 : null;
 
-            this.$root.emitAgent(this.endpoint, "gitFetch", this.repoName, creds, (res) => {
+            const event = this.isDefaultStack ? "gitFetchStack" : "gitFetch";
+            this.$root.emitAgent(this.endpoint, event, this.gitIdentifier, creds, (res) => {
                 this.fetching = false;
                 if (res.ok) {
                     this.loadGitStatus();
@@ -386,7 +400,8 @@ export default {
             }
 
             this.processing = true;
-            this.$root.emitAgent(this.endpoint, "gitAddFilesRepo", this.repoName, this.selectedFiles, (res) => {
+            const event = this.isDefaultStack ? "gitAddFiles" : "gitAddFilesRepo";
+            this.$root.emitAgent(this.endpoint, event, this.gitIdentifier, this.selectedFiles, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
                 if (res.ok) {
@@ -402,7 +417,8 @@ export default {
             }
 
             this.processing = true;
-            this.$root.emitAgent(this.endpoint, "gitUnstageFilesRepo", this.repoName, this.selectedStagedFiles, (res) => {
+            const event = this.isDefaultStack ? "gitUnstageFiles" : "gitUnstageFilesRepo";
+            this.$root.emitAgent(this.endpoint, event, this.gitIdentifier, this.selectedStagedFiles, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
                 if (res.ok) {
@@ -421,14 +437,16 @@ export default {
             this.processing = true;
 
             // First commit
-            this.$root.emitAgent(this.endpoint, "gitCommitRepo", this.repoName, this.commitMessage, (res) => {
+            const commitEvent = this.isDefaultStack ? "gitCommit" : "gitCommitRepo";
+            this.$root.emitAgent(this.endpoint, commitEvent, this.gitIdentifier, this.commitMessage, (res) => {
                 if (res.ok) {
                     // Then push
                     const creds = this.credentials.username && this.credentials.password
                         ? this.credentials
                         : null;
 
-                    this.$root.emitAgent(this.endpoint, "gitPushRepo", this.repoName, creds, (pushRes) => {
+                    const pushEvent = this.isDefaultStack ? "gitPush" : "gitPushRepo";
+                    this.$root.emitAgent(this.endpoint, pushEvent, this.gitIdentifier, creds, (pushRes) => {
                         this.processing = false;
                         this.$root.toastRes(pushRes);
                         if (pushRes.ok) {
@@ -452,7 +470,8 @@ export default {
                 ? this.credentials
                 : null;
 
-            this.$root.emitAgent(this.endpoint, "gitPullRepo", this.repoName, creds, (res) => {
+            const event = this.isDefaultStack ? "gitPull" : "gitPullRepo";
+            this.$root.emitAgent(this.endpoint, event, this.gitIdentifier, creds, (res) => {
                 this.processing = false;
                 this.$root.toastRes(res);
                 if (res.ok) {
