@@ -265,8 +265,8 @@
 
             <!-- Down Unmanaged Stack Dialog -->
             <BModal v-model="showDownUnmanagedDialog" :cancelTitle="$t('cancel')" :okTitle="$t('downStack')" okVariant="warning" @ok="downStack">
-                <h5>{{ $t("stopUnmanagedStackTitle") }}</h5>
-                <p>{{ $t("stopUnmanagedStackWarning") }}</p>
+                <h5>{{ $t("downUnmanagedStackTitle") }}</h5>
+                <p>{{ $t("downUnmanagedStackWarning") }}</p>
             </BModal>
         </div>
     </transition>

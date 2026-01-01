@@ -29,6 +29,8 @@
     "stackNotManagedByDockgeMsg": "This stack is not managed by Dockge.",
     "stopUnmanagedStackWarning": "This is an unmanaged stack. You can stop it, but you will not be able to restart it from Dockge. The stack is located outside of Dockge's stacks folder.",
     "stopUnmanagedStackTitle": "Stop Unmanaged Stack",
+    "downUnmanagedStackWarning": "This is an unmanaged stack. You can stop and remove it (down), but you will not be able to restart it from Dockge. The stack is located outside of Dockge's stacks folder.",
+    "downUnmanagedStackTitle": "Stop & Remove Unmanaged Stack",
     "unmanagedStackLabel": "Unmanaged",
     "primaryHostname": "Primary Hostname",
     "general": "General",
