@@ -229,8 +229,8 @@ export default {
         padding: 2px 6px;
         margin-left: 8px;
         border-radius: 3px;
-        background-color: #ffc107;
-        color: #000;
+        background-color: $warning;
+        color: $dark;
         text-transform: uppercase;
     }
     .repo-label {
