@@ -4,6 +4,7 @@
             <h1 v-if="isAdd" class="mb-3">{{ $t("compose") }}</h1>
             <h1 v-else class="mb-3">
                 <Uptime :stack="globalStack" :pill="true" /> {{ stack.name }}
+                <span v-if="!stack.isManagedByDockge" class="badge bg-warning text-dark ms-2">{{ $t("unmanagedStackLabel") }}</span>
                 <span v-if="$root.agentCount > 1" class="agent-name">
                     ({{ endpointDisplay }})
                 </span>
@@ -231,12 +232,41 @@
             </div>
 
             <div v-if="!stack.isManagedByDockge && !processing">
-                {{ $t("stackNotManagedByDockgeMsg") }}
+                <div class="alert alert-warning mb-3">
+                    <font-awesome-icon icon="exclamation-triangle" class="me-2" />
+                    {{ $t("stackNotManagedByDockgeMsg") }}
+                </div>
+
+                <div v-if="active" class="mb-3">
+                    <button class="btn btn-normal" :disabled="processing" @click="showStopUnmanagedDialog = true">
+                        <font-awesome-icon icon="stop" class="me-1" />
+                        {{ $t("stopStack") }}
+                    </button>
+
+                    <BDropdown right text="" variant="normal">
+                        <BDropdownItem @click="showDownUnmanagedDialog = true">
+                            <font-awesome-icon icon="stop" class="me-1" />
+                            {{ $t("downStack") }}
+                        </BDropdownItem>
+                    </BDropdown>
+                </div>
             </div>
 
             <!-- Delete Dialog -->
             <BModal v-model="showDeleteDialog" :cancelTitle="$t('cancel')" :okTitle="$t('deleteStack')" okVariant="danger" @ok="deleteDialog">
                 {{ $t("deleteStackMsg") }}
+            </BModal>
+
+            <!-- Stop Unmanaged Stack Dialog -->
+            <BModal v-model="showStopUnmanagedDialog" :cancelTitle="$t('cancel')" :okTitle="$t('stopStack')" okVariant="warning" @ok="stopStack">
+                <h5>{{ $t("stopUnmanagedStackTitle") }}</h5>
+                <p>{{ $t("stopUnmanagedStackWarning") }}</p>
+            </BModal>
+
+            <!-- Down Unmanaged Stack Dialog -->
+            <BModal v-model="showDownUnmanagedDialog" :cancelTitle="$t('cancel')" :okTitle="$t('downStack')" okVariant="warning" @ok="downStack">
+                <h5>{{ $t("stopUnmanagedStackTitle") }}</h5>
+                <p>{{ $t("stopUnmanagedStackWarning") }}</p>
             </BModal>
         </div>
     </transition>
@@ -336,6 +366,8 @@ export default {
             isEditMode: false,
             submitted: false,
             showDeleteDialog: false,
+            showStopUnmanagedDialog: false,
+            showDownUnmanagedDialog: false,
             newContainerName: "",
             stopServiceStatusTimeout: false,
         };

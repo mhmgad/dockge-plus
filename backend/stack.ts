@@ -174,6 +174,18 @@ export class Stack {
     }
 
     /**
+     * Get the working directory for docker compose commands
+     * For unmanaged stacks, use the directory of the config file
+     * For managed stacks, use the stack directory
+     */
+    get workingDir() : string {
+        if (!this.isManagedByDockge && this._configFilePath) {
+            return path.dirname(this._configFilePath);
+        }
+        return this.path;
+    }
+
+    /**
      * Get the repo name (parent folder) for this stack
      * If the stack is in the root directory, return "Default"
      */
@@ -520,7 +532,7 @@ export class Stack {
 
     async stop(socket: DockgeSocket) : Promise<number> {
         const terminalName = getComposeTerminalName(socket.endpoint, this.name);
-        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", this.getComposeOptions("stop"), this.path);
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", this.getComposeOptions("stop"), this.workingDir);
         if (exitCode !== 0) {
             throw new Error("Failed to stop, please check the terminal output for more information.");
         }
@@ -538,7 +550,7 @@ export class Stack {
 
     async down(socket: DockgeSocket) : Promise<number> {
         const terminalName = getComposeTerminalName(socket.endpoint, this.name);
-        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", this.getComposeOptions("down"), this.path);
+        let exitCode = await Terminal.exec(this.server, socket, terminalName, "docker", this.getComposeOptions("down"), this.workingDir);
         if (exitCode !== 0) {
             throw new Error("Failed to down, please check the terminal output for more information.");
         }
