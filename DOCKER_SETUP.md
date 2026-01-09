@@ -48,7 +48,53 @@ The workflow (`.github/workflows/docker-build-push.yml`) consists of three jobs:
 - Builds the main Dockge application
 - Tags: `mhmgad/dockge-plus:latest`, `mhmgad/dockge-plus:<version>`, and more
 - Platforms: `linux/amd64`, `linux/arm64`, `linux/arm/v7`
-- Depends on: base and healthcheck images
+- Depends on: base and healthcheck images (waits for them to be available in Docker Hub)
+- Note: Only runs for pushes to master, not for pull requests
+
+## Initial Setup - First Build
+
+**Important**: The first time you run the workflow, the main application build will fail because it depends on base images that don't exist yet in your Docker Hub repository. Follow these steps:
+
+### Option 1: Two-Phase Build (Recommended)
+
+1. **First Run - Build Base Images Only**:
+   - Push your changes to trigger the workflow
+   - The base and healthcheck jobs will succeed and push images to Docker Hub
+   - The main application job will likely fail (or take a long time) because it waits for base images
+   - This is expected behavior for the first run
+
+2. **Second Run - Build Everything**:
+   - Once the base images are in Docker Hub, trigger the workflow again
+   - You can do this by:
+     - Making another commit
+     - Using "Re-run workflow" in GitHub Actions
+     - Using the "Run workflow" button (manual trigger)
+   - This time all jobs should succeed
+
+### Option 2: Manual Base Image Build
+
+Alternatively, you can build and push the base images manually first:
+
+```bash
+# Clone the repository
+git clone https://github.com/mhmgad/dockge-with-github.git
+cd dockge-with-github
+
+# Login to Docker Hub
+docker login -u mhmgad
+
+# Build and push base image
+docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 \
+  -t mhmgad/dockge-plus:base \
+  -f ./docker/Base.Dockerfile . --push
+
+# Build and push healthcheck image
+docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 \
+  -t mhmgad/dockge-plus:build-healthcheck \
+  -f ./docker/BuildHealthCheck.Dockerfile . --push
+```
+
+After the base images are in Docker Hub, the workflow will work normally.
 
 ## Triggering the Workflow
 
