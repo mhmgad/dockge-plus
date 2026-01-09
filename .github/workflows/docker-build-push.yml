@@ -9,6 +9,9 @@ on:
     branches: [master]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   DOCKER_REGISTRY: docker.io
   DOCKER_USERNAME: mhmgad
