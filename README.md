@@ -8,7 +8,7 @@
 
 A fancy, easy-to-use and reactive self-hosted docker compose.yaml stack-oriented manager.
 
-[![Upstream Repo](https://img.shields.io/badge/upstream-louislam%2Fdockge-blue?logo=github)](https://github.com/louislam/dockge) [![GitHub Repo stars](https://img.shields.io/github/stars/louislam/dockge?logo=github&style=flat&label=upstream%20stars)](https://github.com/louislam/dockge) [![Docker Pulls](https://img.shields.io/docker/pulls/louislam/dockge?logo=docker)](https://hub.docker.com/r/louislam/dockge/tags)
+[![Upstream Repo](https://img.shields.io/badge/upstream-louislam%2Fdockge-blue?logo=github)](https://github.com/louislam/dockge) [![GitHub Repo stars](https://img.shields.io/github/stars/louislam/dockge?logo=github&style=flat&label=upstream%20stars)](https://github.com/louislam/dockge) [![Docker Pulls](https://img.shields.io/docker/pulls/mhmgad/dockge-plus?logo=docker&label=docker%20pulls)](https://hub.docker.com/r/mhmgad/dockge-plus)
 
 <img src="https://github.com/louislam/dockge/assets/1336778/26a583e1-ecb1-4a8d-aedf-76157d714ad7" width="900" alt="" />
 
@@ -58,9 +58,9 @@ View Video: https://youtu.be/AWAlOQeNpgU?t=48
 
 ## 🔧 How to Install
 
-> **Note:** This fork currently uses the same installation method as upstream. If you want to use this fork with the enhanced features, you'll need to build it from source (see below) or wait for Docker images to be published for this fork.
+### Quick Start (Using Pre-built Docker Images)
 
-### Installing Upstream Dockge (Standard Installation)
+This fork provides pre-built Docker images at `mhmgad/dockge-plus` with all the enhanced features included.
 
 Requirements:
 - [Docker](https://docs.docker.com/engine/install/) 20+ / Podman
@@ -77,18 +77,18 @@ Requirements:
   - ❌ Windows (Will be supported later)
 - Arch: armv7, arm64, amd64 (a.k.a x86_64)
 
-### Basic
+### Installation Steps
 
 - Default Stacks Directory: `/opt/stacks`
 - Default Port: 5001
 
-```
+```bash
 # Create directories that store your stacks and stores Dockge's stack
 mkdir -p /opt/stacks /opt/dockge
 cd /opt/dockge
 
-# Download the compose.yaml
-curl https://raw.githubusercontent.com/louislam/dockge/master/compose.yaml --output compose.yaml
+# Download the compose.yaml from this fork
+curl https://raw.githubusercontent.com/mhmgad/dockge-with-github/master/compose.yaml --output compose.yaml
 
 # Start the server
 docker compose up -d
@@ -120,6 +120,14 @@ https://dockge.kuma.pet
 cd /opt/dockge
 docker compose pull && docker compose up -d
 ```
+
+## 🐳 Docker Images
+
+Pre-built Docker images are available at:
+- **Docker Hub**: [`mhmgad/dockge-plus`](https://hub.docker.com/r/mhmgad/dockge-plus)
+- **Tags**: `latest`, `<version>` (e.g., `1.4.2`), `master`
+
+The images are automatically built and published via GitHub Actions on every push to the master branch. See [DOCKER_SETUP.md](./DOCKER_SETUP.md) for details about the build process.
 
 ## 🔨 Building This Fork from Source
 
@@ -160,6 +168,8 @@ npm run dev:frontend
 
 5. **Build Docker image (for production):**
 ```bash
+# Note: Pre-built images are available at mhmgad/dockge-plus
+# Only build from source if you need custom modifications
 docker build -t dockge-with-github:latest -f docker/Dockerfile .
 ```
 
@@ -169,8 +179,8 @@ docker build -t dockge-with-github:latest -f docker/Dockerfile .
 mkdir -p /opt/stacks /opt/dockge
 cd /opt/dockge
 
-# Create a compose.yaml using your built image
-# Edit the compose.yaml to use dockge-with-github:latest instead of louislam/dockge
+# Download the compose.yaml
+curl https://raw.githubusercontent.com/mhmgad/dockge-with-github/master/compose.yaml --output compose.yaml
 
 # Start the server
 docker compose up -d
