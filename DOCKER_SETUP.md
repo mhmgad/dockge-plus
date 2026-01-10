@@ -58,7 +58,7 @@ The workflow (`.github/workflows/docker-build-push.yml`) consists of three jobs:
 ### Option 1: Two-Phase Build (Recommended)
 
 1. **First Run - Build Base Images Only**:
-   - Push your changes to trigger the workflow
+   - Create and push a release tag (e.g., `v1.0.0`) to trigger the workflow
    - The base and healthcheck jobs will succeed and push images to Docker Hub
    - The main application job will likely fail (or take a long time) because it waits for base images
    - This is expected behavior for the first run
@@ -66,7 +66,6 @@ The workflow (`.github/workflows/docker-build-push.yml`) consists of three jobs:
 2. **Second Run - Build Everything**:
    - Once the base images are in Docker Hub, trigger the workflow again
    - You can do this by:
-     - Making another commit
      - Using "Re-run workflow" in GitHub Actions
      - Using the "Run workflow" button (manual trigger)
    - This time all jobs should succeed
@@ -99,10 +98,8 @@ After the base images are in Docker Hub, the workflow will work normally.
 ## Triggering the Workflow
 
 The workflow runs automatically on:
-- **Push to master branch**: Builds and pushes all images
-- **Pull requests**: Builds images without pushing (for validation)
+- **Version tags**: When you push tags like `v1.0.0`, it creates versioned images and triggers the build
 - **Manual trigger**: Use the "Run workflow" button in GitHub Actions
-- **Version tags**: When you push tags like `v1.0.0`, it creates versioned images
 
 ## Docker Images Produced
 
@@ -110,9 +107,8 @@ After a successful workflow run, the following images will be available on Docke
 
 - `mhmgad/dockge-plus:base` - Base image with Node.js and Docker CLI
 - `mhmgad/dockge-plus:build-healthcheck` - Healthcheck binary
-- `mhmgad/dockge-plus:latest` - Latest main application (from master branch)
+- `mhmgad/dockge-plus:latest` - Latest main application (from release tags)
 - `mhmgad/dockge-plus:<version>` - Specific version (e.g., 1.4.2)
-- `mhmgad/dockge-plus:master` - Latest from master branch
 
 ## Using the Docker Images
 
