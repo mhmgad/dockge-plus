@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - 'master'
     paths:
       - '.github/workflows/docker-build-push.yml'
   workflow_dispatch:
