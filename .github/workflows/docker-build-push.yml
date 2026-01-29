@@ -1,9 +1,11 @@
-name: Build and Push Docker Images
+name: Docker Build & Push - Multi-Platform Images
 
 on:
   push:
     tags:
       - 'v*'
+    paths:
+      - '.github/workflows/docker-build-push.yml'
   workflow_dispatch:
 
 permissions:
